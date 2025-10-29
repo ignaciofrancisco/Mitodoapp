@@ -1,50 +1,74 @@
-# Welcome to your Expo app 👋
+# Bienvenido a Mi ToDo App 
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Este es un proyecto de [Expo](https://expo.dev) creado con [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Se trata de una aplicación móvil para gestionar tareas personales, desarrollada con **React Native**, **Expo Router** y **TypeScript**, usando **contextos globales** para manejar el estado del usuario y de las tareas.
 
-## Get started
+---
 
-1. Install dependencies
+## Comenzando
 
-   ```bash
+1. **Instala las dependencias**
+
    npm install
-   ```
 
-2. Start the app
+2. **Inicia la aplicación**
 
-   ```bash
    npx expo start
-   ```
 
-In the output, you'll find options to open the app in a
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+En la salida encontrarás opciones para abrir la app en:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+* [Build de desarrollo](https://docs.expo.dev/develop/development-builds/introduction/)
+* [Emulador de Android](https://docs.expo.dev/workflow/android-studio-emulator/)
+* [Simulador de iOS](https://docs.expo.dev/workflow/ios-simulator/)
+* [Expo Go](https://expo.dev/go), un entorno limitado para probar la app
 
-## Get a fresh project
+Puedes comenzar a desarrollar editando los archivos dentro del directorio **app**. Este proyecto utiliza [navegación basada en archivos](https://docs.expo.dev/router/introduction).
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## Características principales
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+* **Inicio de sesión básico:** permite simular acceso con correo y contraseña, almacenando el correo en un contexto global.
+* **Gestión de tareas:** crear nuevas tareas, listar todas las tareas y eliminarlas.
+* **Diseño moderno y responsive:** degradados, botones redondeados, sombras y estilo limpio.
+* **Contextos globales:**
 
-## Learn more
+  * `PerfilContext` para manejar el correo del usuario logueado.
+  * `TareasContext` para manejar la lista de tareas.
+* **Navegación con Stack y Tabs:** pantallas `login`, `home` y `formularioTarea` organizadas con `expo-router`.
 
-To learn more about developing your project with Expo, look at the following resources:
+---
+## Credenciales de prueba
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Para iniciar sesión:
 
-## Join the community
+* **Correo:** cualquier formato válido (ej. `usuario@correo.com`)
+* **Contraseña:** `1234`
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Tecnologías utilizadas
+
+* React Native
+* Expo Router
+* TypeScript
+
+---
+
+
+## Aprende más
+
+Para aprender más sobre el desarrollo con Expo:
+
+* [Documentación de Expo](https://docs.expo.dev/)
+* [Guías de Expo](https://docs.expo.dev/guides)
+* [Tutorial paso a paso](https://docs.expo.dev/tutorial/introduction/)
+
+---
+
+
+
+## Autor
+
+**Ignacio Lara**

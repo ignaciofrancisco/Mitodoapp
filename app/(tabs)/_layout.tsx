@@ -1,33 +1,29 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Tabs } from "expo-router";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+// Componente que define un layout basado en pestañas (Tabs)
+export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        headerShown: false,               // Oculta la barra superior de navegación
+        tabBarStyle: { display: "none" }, // Oculta la barra inferior de pestañas para no mostrarla visualmente
+      }}
+    >
+      {/* Pantalla principal o inicio */}
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "",         // No se muestra título en la pestaña
+          tabBarLabel: "",   // No se muestra texto en la barra inferior
         }}
       />
+
+      {/* Pantalla de perfil del usuario */}
       <Tabs.Screen
-        name="explore"
+        name="perfil"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "",         // No se muestra título en la pestaña
+          tabBarLabel: "",   // No se muestra texto en la barra inferior
         }}
       />
     </Tabs>

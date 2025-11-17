@@ -1,9 +1,11 @@
-//  Importaciones principales
-import { LinearGradient } from "expo-linear-gradient"; // Fondo con degradado
-import { router } from "expo-router"; // Navegación entre pantallas
-import React, { useContext, useState } from "react";
+import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Location from "expo-location";
+import { router, useLocalSearchParams } from "expo-router"; // Corregido
+import React, { useContext, useEffect, useState } from "react";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -12,59 +14,78 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { TareasContext } from "./context/TareasContext"; // Contexto global de tareas
+import { PerfilContext } from "./context/PerfilContext";
+import { TareasContext } from "./context/TareasContext";
 
-//  Componente principal del formulario para agregar una tarea
 export default function FormularioTarea() {
-  // Obtenemos la función agregarTarea desde el contexto
-  const { agregarTarea } = useContext(TareasContext);
+  const { agregarTarea, actualizarTarea, tareas } = useContext(TareasContext);
+  const { correo } = useContext(PerfilContext);
 
-  // Estados locales para los campos del formulario
+  // Obtener parámetros de la ruta
+  const { tareaId } = useLocalSearchParams<{ tareaId?: string }>();
+
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [fotoUri, setFotoUri] = useState<string>();
+  const [location, setLocation] = useState<{ lat: number; lon: number }>();
 
-  //  Función que maneja el guardado de la tarea
+  // Cargar datos de la tarea si estamos editando
+  useEffect(() => {
+    if (tareaId) {
+      const t = tareas.find((t) => t.id === tareaId);
+      if (t) {
+        setTitulo(t.titulo);
+        setDescripcion(t.descripcion);
+        setFotoUri(t.fotoUri);
+        setLocation(t.location);
+      }
+    }
+  }, [tareaId, tareas]);
+
+  // Función para seleccionar foto
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+    if (!result.canceled) setFotoUri(result.assets[0].uri);
+  };
+
+  // Función para obtener ubicación
+  const getLocation = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permiso denegado", "No se pudo obtener la ubicación.");
+      return;
+    }
+    const loc = await Location.getCurrentPositionAsync({});
+    setLocation({ lat: loc.coords.latitude, lon: loc.coords.longitude });
+  };
+
+  // Guardar o actualizar tarea
   const handleGuardar = () => {
-    // Validación: no permitir campos vacíos
     if (!titulo.trim() || !descripcion.trim()) {
       Alert.alert("Error", "Por favor completa todos los campos.");
       return;
     }
 
-    // Llamamos a la función del contexto para agregar la nueva tarea
-    agregarTarea(titulo, descripcion);
+    if (tareaId) {
+      actualizarTarea(tareaId, titulo, descripcion, fotoUri, location);
+    } else {
+      agregarTarea(titulo, descripcion, correo, fotoUri, location);
+    }
 
-    // Mostramos confirmación y redirigimos a la pantalla principal (home)
     Alert.alert("Tarea guardada", "Tu tarea fue añadida con éxito.", [
-      {
-        text: "OK",
-        onPress: () => router.push("/(tabs)/home"),
-      },
+      { text: "OK", onPress: () => router.push("/(tabs)/home") },
     ]);
   };
 
-  //  Render del formulario
   return (
-    // Fondo con degradado
-    <LinearGradient
-      colors={["#2563eb", "#3b82f6", "#06b6d4"]}
-      style={{ flex: 1 }}
-    >
-      {/* Evita que el teclado cubra los inputs */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        {/* Permite hacer scroll si el contenido sobrepasa la pantalla */}
+    <LinearGradient colors={["#2563eb", "#3b82f6", "#06b6d4"]} style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingHorizontal: 24,
-            paddingTop: 60,
-            paddingBottom: 40,
-          }}
+          contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingTop: 60, paddingBottom: 40 }}
         >
-          {/*  Título principal del formulario */}
           <Text
             style={{
               fontSize: 30,
@@ -74,26 +95,11 @@ export default function FormularioTarea() {
               marginBottom: 30,
             }}
           >
-            Nueva Tarea
+            {tareaId ? "Editar Tarea" : "Nueva Tarea"}
           </Text>
 
-          {/*  Campo de texto para el título de la tarea */}
-          <View
-            style={{
-              backgroundColor: "rgba(255,255,255,0.9)",
-              borderRadius: 16,
-              padding: 16,
-              marginBottom: 20,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 6,
-              elevation: 4,
-            }}
-          >
-            <Text style={{ color: "#1e3a8a", fontWeight: "600", marginBottom: 6 }}>
-              Título de la tarea
-            </Text>
+          <View style={{ backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 16, padding: 16, marginBottom: 20 }}>
+            <Text style={{ color: "#1e3a8a", fontWeight: "600", marginBottom: 6 }}>Título de la tarea</Text>
             <TextInput
               value={titulo}
               onChangeText={setTitulo}
@@ -109,23 +115,8 @@ export default function FormularioTarea() {
             />
           </View>
 
-          {/*  Campo de texto para la descripción */}
-          <View
-            style={{
-              backgroundColor: "rgba(255,255,255,0.9)",
-              borderRadius: 16,
-              padding: 16,
-              marginBottom: 20,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 6,
-              elevation: 4,
-            }}
-          >
-            <Text style={{ color: "#1e3a8a", fontWeight: "600", marginBottom: 6 }}>
-              Descripción
-            </Text>
+          <View style={{ backgroundColor: "rgba(255,255,255,0.9)", borderRadius: 16, padding: 16, marginBottom: 20 }}>
+            <Text style={{ color: "#1e3a8a", fontWeight: "600", marginBottom: 6 }}>Descripción</Text>
             <TextInput
               value={descripcion}
               onChangeText={setDescripcion}
@@ -142,59 +133,56 @@ export default function FormularioTarea() {
             />
           </View>
 
-          {/*  Botón para guardar la tarea */}
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
+            <TouchableOpacity
+              onPress={pickImage}
+              style={{ backgroundColor: "#1d4ed8", padding: 12, borderRadius: 12 }}
+            >
+              <Text style={{ color: "white" }}>Seleccionar Foto</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={getLocation}
+              style={{ backgroundColor: "#1d4ed8", padding: 12, borderRadius: 12 }}
+            >
+              <Text style={{ color: "white" }}>Obtener Ubicación</Text>
+            </TouchableOpacity>
+          </View>
+
+          {fotoUri && (
+            <Image
+              source={{ uri: fotoUri }}
+              style={{ width: "100%", height: 200, borderRadius: 16, marginBottom: 10 }}
+            />
+          )}
+          {location && (
+            <Text style={{ color: "white", marginBottom: 20 }}>
+              Lat: {location.lat.toFixed(4)}, Lon: {location.lon.toFixed(4)}
+            </Text>
+          )}
+
           <TouchableOpacity
             onPress={handleGuardar}
-            activeOpacity={0.8}
             style={{
               backgroundColor: "#1d4ed8",
               paddingVertical: 16,
               borderRadius: 16,
               alignItems: "center",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.3,
-              shadowRadius: 6,
-              elevation: 6,
               marginBottom: 15,
             }}
           >
-            <Text
-              style={{
-                color: "white",
-                fontWeight: "bold",
-                fontSize: 18,
-                letterSpacing: 0.5,
-              }}
-            >
-              Guardar Tarea
+            <Text style={{ color: "white", fontWeight: "bold", fontSize: 18 }}>
+              {tareaId ? "Actualizar Tarea" : "Guardar Tarea"}
             </Text>
           </TouchableOpacity>
 
-          {/*  Botón para volver sin guardar */}
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/home")}
-            activeOpacity={0.8}
-            style={{
-              backgroundColor: "#1d4ed8",
-              paddingVertical: 16,
-              borderRadius: 16,
-              alignItems: "center",
-            }}
+            style={{ backgroundColor: "#1d4ed8", paddingVertical: 16, borderRadius: 16, alignItems: "center" }}
           >
-            <Text
-              style={{
-                color: "white",
-                fontWeight: "600",
-                fontSize: 18,
-              }}
-            >
-              Volver
-            </Text>
+            <Text style={{ color: "white", fontWeight: "600", fontSize: 18 }}>Volver</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
-
